@@ -26,8 +26,6 @@ const run = (command, args, env) => {
   }
 }
 
-const electronPackage = require(path.join(rootDir, 'node_modules', 'electron', 'package.json'))
-
 const ensureDir = dir => {
   fs.mkdirSync(dir, { recursive: true })
 }
@@ -38,7 +36,7 @@ const getElectronCacheRoot = () => {
     path.join(os.homedir(), 'Library', 'Caches', 'electron')
 }
 
-const seedElectronCache = cacheRoot => {
+const seedElectronCache = (cacheRoot, electronVersion) => {
   const electronZip = process.env.MARKTEXT_ELECTRON_ZIP
   if (!electronZip) return
 
@@ -46,7 +44,7 @@ const seedElectronCache = cacheRoot => {
     fail(`MARKTEXT_ELECTRON_ZIP points to a missing file: ${electronZip}`)
   }
 
-  const version = electronPackage.version
+  const version = electronVersion
   const platform = process.platform
   const arch = process.arch
   const filename = `electron-v${version}-${platform}-${arch}.zip`
@@ -115,6 +113,8 @@ const env = {
 }
 
 run('yarn', ['install', '--ignore-scripts', '--frozen-lockfile'], env)
+const electronPackage = require(path.join(rootDir, 'node_modules', 'electron', 'package.json'))
+seedElectronCache(electronCacheRoot, electronPackage.version)
 run(process.execPath, ['tools/patchMacNativeModules.js'], env)
 run(process.execPath, ['node_modules/electron/install.js'], env)
 run(process.execPath, ['.electron-vue/postinstall.js'], env)
