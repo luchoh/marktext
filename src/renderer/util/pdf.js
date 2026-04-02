@@ -52,18 +52,18 @@ export const getCssForOptions = options => {
     output += 'pre.front-matter{display:none!important;}'
   }
 
-    if (theme) {
-      if (theme === 'academic') {
-        output += academicTheme
-      } else if (theme === 'liber') {
-        output += liberTheme
-      } else {
-        const themeCSS = window.mt.fileSystem.readExportTheme(theme)
-        if (typeof themeCSS === 'string') {
-          output += themeCSS
-        }
+  if (theme) {
+    if (theme === 'academic') {
+      output += academicTheme
+    } else if (theme === 'liber') {
+      output += liberTheme
+    } else {
+      const themeCSS = window.mt.fileSystem.readExportTheme(theme)
+      if (typeof themeCSS === 'string') {
+        output += themeCSS
       }
     }
+  }
 
   if (headerFooterFontSize) {
     output += `.page-header .hf-container,
