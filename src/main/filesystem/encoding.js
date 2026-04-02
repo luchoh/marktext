@@ -1,4 +1,12 @@
-import ced from 'ced'
+let ced = null
+let hasWarnedAboutCed = false
+
+try {
+  const cedModule = require('ced')
+  ced = cedModule.default || cedModule
+} catch {
+  ced = null
+}
 
 const CED_ICONV_ENCODINGS = {
   'BIG5-CP950': 'big5',
@@ -62,13 +70,16 @@ export const guessEncoding = (buffer, autoGuessEncoding) => {
   // }
 
   // Auto guess encoding, otherwise use UTF8.
-  if (autoGuessEncoding) {
+  if (autoGuessEncoding && typeof ced === 'function') {
     encoding = ced(buffer)
     if (CED_ICONV_ENCODINGS[encoding]) {
       encoding = CED_ICONV_ENCODINGS[encoding]
     } else {
       encoding = encoding.toLowerCase().replace(/-_/g, '')
     }
+  } else if (autoGuessEncoding && !hasWarnedAboutCed) {
+    hasWarnedAboutCed = true
+    console.warn('[filesystem/encoding] Native ced binding unavailable; falling back to utf8 detection only.')
   }
   return { encoding, isBom }
 }

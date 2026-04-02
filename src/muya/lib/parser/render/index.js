@@ -100,6 +100,9 @@ class StateRender {
     if (this.mermaidCache.size) {
       const mermaid = await loadRenderer('mermaid')
       mermaid.initialize({
+        flowchart: {
+          htmlLabels: false
+        },
         securityLevel: 'strict',
         theme: this.muya.options.mermaidTheme
       })

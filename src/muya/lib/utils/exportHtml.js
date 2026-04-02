@@ -46,6 +46,9 @@ class ExportHtml {
     const mermaid = await loadRenderer('mermaid')
     // We only export light theme, so set mermaid theme to `default`, in the future, we can choose whick theme to export.
     mermaid.initialize({
+      flowchart: {
+        htmlLabels: false
+      },
       securityLevel: 'strict',
       theme: 'default'
     })
@@ -55,6 +58,9 @@ class ExportHtml {
     })
     if (this.muya) {
       mermaid.initialize({
+        flowchart: {
+          htmlLabels: false
+        },
         securityLevel: 'strict',
         theme: this.muya.options.mermaidTheme
       })

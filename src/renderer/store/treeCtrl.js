@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'path-browserify'
 import { getUniqueId } from '../util'
 import { PATH_SEPARATOR } from '../config'
 

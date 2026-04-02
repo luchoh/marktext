@@ -74,11 +74,11 @@
 
 <script>
 import { shell } from '@/shims/electron'
-import path from 'path'
+import path from 'path-browserify'
 import log from 'electron-log'
 import { mapState } from 'vuex'
 // import ViewImage from 'view-image'
-import { isChildOfDirectory } from '../../../common/filesystem/paths'
+import { isChildOfDirectory } from 'common/filesystem/paths'
 import Muya from 'muya/lib'
 import TablePicker from 'muya/lib/ui/tablePicker'
 import QuickInsert from 'muya/lib/ui/quickInsert'

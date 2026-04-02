@@ -76,6 +76,17 @@
     </div>
 
     <script>
+      globalThis.global = globalThis
+      if (!globalThis.process) {
+        const platform = window.mt && window.mt.env ? window.mt.env.platform : 'unknown'
+        globalThis.process = Object.freeze({
+          env: Object.freeze({}),
+          platform,
+          type: 'renderer',
+          versions: Object.freeze({})
+        })
+      }
+
       const params = new URLSearchParams(window.location.search)
       const THEMES_COLOR = {
         'one-dark': 'rgba(77, 120, 204, 1)',

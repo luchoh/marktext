@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'path-browserify'
 import { ipcRenderer, shell } from '@/shims/electron'
 import { addFile, unlinkFile, addDirectory, unlinkDirectory } from './treeCtrl'
 import bus from '../bus'
@@ -6,7 +6,7 @@ import { create, paste, rename } from '../util/fileSystem'
 import { PATH_SEPARATOR } from '../config'
 import notice from '../services/notification'
 import { getFileStateFromData } from './help'
-import { hasMarkdownExtension } from '../../common/filesystem/paths'
+import { hasMarkdownExtension } from 'common/filesystem/paths'
 
 const state = {
   activeItem: {},

@@ -1,5 +1,5 @@
 const { expect, test } = require('@playwright/test')
-const { launchElectron } = require('./helpers')
+const { closeElectron, launchElectron } = require('./helpers')
 
 test.describe('Check Launch MarkText', async () => {
   let app = null
@@ -12,7 +12,7 @@ test.describe('Check Launch MarkText', async () => {
   })
 
   test.afterAll(async () => {
-    await app.close()
+    await closeElectron(app)
   })
 
   test('Empty MarkText', async () => {

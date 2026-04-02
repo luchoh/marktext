@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'path-browserify'
 import runSanitize from './dompurify'
 import { URL_REG, DATA_URL_REG, IMAGE_EXT_REG } from '../config'
 export { getUniqueId, getLongUniqueId } from './random'

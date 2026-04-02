@@ -1,6 +1,6 @@
-import path from 'path'
+import path from 'path-browserify'
 import { ipcRenderer } from '@/shims/electron'
-import { isChildOfDirectory, hasMarkdownExtension, MARKDOWN_INCLUSIONS } from '../../common/filesystem/paths'
+import { isChildOfDirectory, hasMarkdownExtension, MARKDOWN_INCLUSIONS } from 'common/filesystem/paths'
 import bus from '../bus'
 import { delay } from '@/util'
 

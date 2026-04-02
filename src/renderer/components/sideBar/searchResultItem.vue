@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import path from 'path'
+import path from 'path-browserify'
 import { mapState } from 'vuex'
 import { fileMixins } from '../../mixins'
 import { PATH_SEPARATOR } from '../../config'

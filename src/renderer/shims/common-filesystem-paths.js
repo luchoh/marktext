@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'path-browserify'
 
 export const MARKDOWN_EXTENSIONS = Object.freeze([
   'markdown',

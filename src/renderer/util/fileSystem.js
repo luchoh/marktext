@@ -1,6 +1,6 @@
-import path from 'path'
+import path from 'path-browserify'
 import dayjs from 'dayjs'
-import { isImageFile } from '../../common/filesystem/paths'
+import { isImageFile } from 'common/filesystem/paths'
 import { isWindows } from './index'
 
 const serializeImage = async image => {

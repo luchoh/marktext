@@ -183,12 +183,13 @@ const rendererConfig = {
     filename: '[name].js',
     path: path.join(__dirname, '../dist/electron'),
     assetModuleFilename: 'assets/[name].[contenthash:8][ext]',
-    asyncChunks: true
+    asyncChunks: true,
+    globalObject: 'globalThis'
   },
   resolve: {
     alias: {
-      'common/filesystem': path.join(__dirname, '../src/renderer/shims/common-filesystem.js'),
-      'common/filesystem/paths': path.join(__dirname, '../src/renderer/shims/common-filesystem-paths.js'),
+      'common/filesystem$': path.join(__dirname, '../src/renderer/shims/common-filesystem.js'),
+      'common/filesystem/paths$': path.join(__dirname, '../src/renderer/shims/common-filesystem-paths.js'),
       'command-exists': path.join(__dirname, '../src/renderer/shims/command-exists.js'),
       'electron$': path.join(__dirname, '../src/renderer/shims/electron.js'),
       'electron-log$': path.join(__dirname, '../src/renderer/shims/log.js'),
@@ -201,9 +202,14 @@ const rendererConfig = {
       snapsvg: path.join(__dirname, '../src/muya/lib/assets/libs/snap.svg-min.js'),
       'vue$': 'vue/dist/vue.esm.js'
     },
+    fallback: {
+      fs: false,
+      path: require.resolve('path-browserify'),
+      zlib: false
+    },
     extensions: ['.js', '.vue', '.json', '.css', '.node']
   },
-  target: 'electron-renderer'
+  target: 'web'
 }
 
 /**

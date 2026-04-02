@@ -93,5 +93,7 @@ const router = new VueRouter({
 new Vue({
   store,
   router,
-  template: '<router-view class="view"></router-view>'
+  render: h => h('router-view', {
+    class: 'view'
+  })
 }).$mount('#app')

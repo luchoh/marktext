@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'path-browserify'
 export const PATH_SEPARATOR = path.sep
 
 export const THEME_STYLE_ID = 'ag-theme'

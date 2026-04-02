@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'path-browserify'
 import { ipcRenderer } from '@/shims/electron'
 import log from 'electron-log'
 

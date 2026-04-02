@@ -94,7 +94,7 @@ import EmptyIcon from '@/assets/icons/undraw_empty.svg'
 import FindCaseIcon from '@/assets/icons/searchIcons/iconCase.svg'
 import FindWordIcon from '@/assets/icons/searchIcons/iconWord.svg'
 import FindRegexIcon from '@/assets/icons/searchIcons/iconRegex.svg'
-import { MARKDOWN_INCLUSIONS } from '../../../common/filesystem/paths'
+import { MARKDOWN_INCLUSIONS } from 'common/filesystem/paths'
 
 export default {
   data () {
