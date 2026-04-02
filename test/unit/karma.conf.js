@@ -22,6 +22,7 @@ try {
 let webpackConfig = merge(baseConfig, {
   devtool: 'inline-source-map',
   cache: false,
+  target: 'electron-renderer',
   output: {
     publicPath: '/'
   },
@@ -31,6 +32,13 @@ let webpackConfig = merge(baseConfig, {
     })
   ]
 })
+
+// Unit tests run inside Electron with Node integration enabled. Restore
+// built-in modules that the browser-target renderer bundle intentionally stubs.
+delete webpackConfig.resolve.alias['path$']
+delete webpackConfig.resolve.fallback.fs
+delete webpackConfig.resolve.fallback.path
+delete webpackConfig.resolve.fallback.zlib
 
 // don't treat dependencies as externals
 delete webpackConfig.entry

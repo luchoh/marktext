@@ -1,6 +1,6 @@
 import ContentState from '../../../src/muya/lib/contentState'
 import EventCenter from '../../../src/muya/lib/eventHandler/event'
-import { getSanitizeHtml } from '../../../src/muya/lib/utils/exportHtml'
+import ExportHtml, { getSanitizeHtml } from '../../../src/muya/lib/utils/exportHtml'
 import { sanitize } from '../../../src/muya/lib/utils'
 import { MUYA_DEFAULT_OPTION, PREVIEW_DOMPURIFY_CONFIG, PASTE_DOMPURIFY_CONFIG, EXPORT_DOMPURIFY_CONFIG } from '../../../src/muya/lib/config'
 import { sanitizeRenderedDiagramElement, sanitizeRenderedDiagramHtml } from '../../../src/muya/lib/utils/renderSecurity'
@@ -103,5 +103,21 @@ describe('Security sanitizer regression suite', () => {
     expectNoActiveContent(container.innerHTML)
     expect(container.innerHTML).to.include('<svg')
     expect(container.innerHTML).to.include('<rect')
+  })
+
+  it('renders PlantUML exports through the preload bridge without active content', async () => {
+    const exporter = new ExportHtml(`
+\`\`\`plantuml
+@startuml
+Alice -> Bob: hello
+@enduml
+\`\`\`
+`, createMuyaContext())
+
+    const html = await exporter.renderHtml('')
+
+    expectNoActiveContent(html)
+    expect(html).to.include('<img')
+    expect(html).to.include('https://www.plantuml.com/plantuml/svg/~1')
   })
 })
