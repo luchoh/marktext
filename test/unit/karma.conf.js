@@ -45,6 +45,10 @@ delete webpackConfig.entry
 delete webpackConfig.externals
 delete webpackConfig.output.libraryTarget
 
+const electronFlags = process.platform === 'linux'
+  ? ['--no-sandbox', '--disable-setuid-sandbox']
+  : []
+
 // BUG: TypeError: Cannot read property 'loaders' of undefined
 // // apply vue option to apply isparta-loader on js
 // webpackConfig.module.rules
@@ -58,6 +62,7 @@ module.exports = config => {
     customLaunchers: {
       CustomElectron: {
         base: 'Electron',
+        flags: electronFlags,
         browserWindowOptions: {
           webPreferences: {
             contextIsolation: false,
