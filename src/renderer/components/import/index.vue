@@ -35,7 +35,7 @@
 
 <script>
 import bus from '@/bus'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import importIcon from '@/assets/icons/import_file.svg'
 
 export default {

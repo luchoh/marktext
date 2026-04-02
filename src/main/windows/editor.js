@@ -1,6 +1,5 @@
 import path from 'path'
 import { BrowserWindow, dialog, ipcMain } from 'electron'
-import { enable as remoteEnable } from '@electron/remote/main'
 import log from 'electron-log'
 import windowStateKeeper from 'electron-window-state'
 import { isChildOfDirectory, isSamePathSync } from 'common/filesystem/paths'
@@ -75,9 +74,9 @@ class EditorWindow extends BaseWindow {
     if (env.disableSpellcheck) {
       winOptions.webPreferences.spellcheck = false
     }
+    winOptions.webPreferences.preload = path.join(__dirname, 'preload.js')
 
     let win = this.browserWindow = new BrowserWindow(winOptions)
-    remoteEnable(win.webContents)
     this.id = win.id
 
     if (spellcheckerEnabled && !isOsx) {

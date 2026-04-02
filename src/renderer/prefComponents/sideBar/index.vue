@@ -34,7 +34,7 @@
   </div>
 </template>
 <script>
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import { category, searchContent } from './config'
 
 export default {

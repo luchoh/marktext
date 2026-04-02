@@ -1,5 +1,5 @@
 import path from 'path'
-import { ipcRenderer, shell } from 'electron'
+import { ipcRenderer, shell } from '@/shims/electron'
 import { addFile, unlinkFile, addDirectory, unlinkDirectory } from './treeCtrl'
 import bus from '../bus'
 import { create, paste, rename } from '../util/fileSystem'

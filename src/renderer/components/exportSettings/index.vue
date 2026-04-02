@@ -220,10 +220,6 @@
 
 <script>
 import { mapState } from 'vuex'
-import fs from 'fs'
-import fsPromises from 'fs/promises'
-import path from 'path'
-import { isDirectory, isFile } from 'common/filesystem'
 import bus from '../../bus'
 import Bool from '@/prefComponents/common/bool'
 import CurSelect from '@/prefComponents/common/select'
@@ -310,7 +306,7 @@ export default {
 
       if (!this.themesLoaded) {
         this.themesLoaded = true
-        this.loadThemesFromDisk()
+        this.loadThemesFromDisk().catch(console.error)
       }
     },
     handleClicked () {
@@ -411,38 +407,9 @@ export default {
     onSelectChange (key, value) {
       this[key] = value
     },
-    loadThemesFromDisk () {
-      const { userDataPath } = global.marktext.paths
-      const themeDir = path.join(userDataPath, 'themes/export')
-
-      // Search for dictionaries on filesystem.
-      if (isDirectory(themeDir)) {
-        fs.readdirSync(themeDir).forEach(async filename => {
-          const fullname = path.join(themeDir, filename)
-          if (/.+\.css$/i.test(filename) && isFile(fullname)) {
-            try {
-              const content = await fsPromises.readFile(fullname, 'utf8')
-
-              // Match comment with theme name in first line only.
-              const match = content.match(/^(?:\/\*+[ \t]*([A-z0-9 -]+)[ \t]*(?:\*+\/|[\n\r])?)/)
-
-              let label
-              if (match && match[1]) {
-                label = match[1]
-              } else {
-                label = filename
-              }
-
-              this.themeList.push({
-                value: filename,
-                label
-              })
-            } catch (e) {
-              console.error('loadThemesFromDisk failed:', e)
-            }
-          }
-        })
-      }
+    async loadThemesFromDisk () {
+      const themes = await window.mt.fileSystem.listExportThemes()
+      this.themeList.push(...themes)
     }
   }
 }

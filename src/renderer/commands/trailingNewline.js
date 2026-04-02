@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import { delay } from '@/util'
 import bus from '../bus'
 

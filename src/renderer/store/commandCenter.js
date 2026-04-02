@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import log from 'electron-log'
 import bus from '../bus'
 import staticCommands, { RootCommand } from '../commands'

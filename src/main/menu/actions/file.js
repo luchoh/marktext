@@ -13,6 +13,24 @@ import { writeMarkdownFile } from '../../filesystem/markdown'
 import { getPath, getRecommendTitleFromMarkdownString } from '../../utils'
 import pandoc from '../../utils/pandoc'
 
+const BLOCK_LOCAL_NON_MARKDOWN_LINKS = process.env.MARKTEXT_BLOCK_LOCAL_NON_MARKDOWN_LINKS === '1'
+const DANGEROUS_LOCAL_EXTENSIONS = new Set([
+  '.app',
+  '.bat',
+  '.bash',
+  '.cmd',
+  '.com',
+  '.exe',
+  '.jar',
+  '.js',
+  '.msi',
+  '.ps1',
+  '.scr',
+  '.sh',
+  '.workflow',
+  '.zsh'
+])
+
 // TODO(refactor): "save" and "save as" should be moved to the editor window (editor.js) and
 // the renderer should communicate only with the editor window for file relevant stuff.
 // E.g. "mt::save-tabs" --> "mt::window-save-tabs$wid:<windowId>"
@@ -48,6 +66,62 @@ const getPdfPageOptions = options => {
     }
   } else {
     return { pageSize, landscape: !!isLandscape }
+  }
+}
+
+const isExecutablePath = pathname => {
+  try {
+    const stat = fs.statSync(pathname)
+    if (!stat.isFile()) {
+      return false
+    }
+    return (stat.mode & 0o111) !== 0
+  } catch (_) {
+    return false
+  }
+}
+
+const describeLocalPath = pathname => {
+  if (isDirectory(pathname)) {
+    return 'directory'
+  }
+  const ext = path.extname(pathname)
+  return ext ? `${ext} file` : 'file'
+}
+
+const promptBeforeOpeningLocalPath = async (win, pathname) => {
+  if (!await exists(pathname)) {
+    return
+  }
+
+  const resolvedPath = normalizeAndResolvePath(pathname)
+  if (!resolvedPath) {
+    return
+  }
+
+  const ext = path.extname(resolvedPath).toLowerCase()
+  const dangerous = DANGEROUS_LOCAL_EXTENSIONS.has(ext) || isExecutablePath(resolvedPath)
+  const buttons = BLOCK_LOCAL_NON_MARKDOWN_LINKS
+    ? ['Reveal in Folder', 'Cancel']
+    : ['Reveal in Folder', dangerous ? 'Open Once (Dangerous)' : 'Open Once', 'Cancel']
+  const cancelId = buttons.length - 1
+  const { response } = await dialog.showMessageBox(win, {
+    buttons,
+    cancelId,
+    defaultId: 0,
+    noLink: true,
+    type: dangerous ? 'warning' : 'info',
+    message: 'Open local file from document?',
+    detail: `Path: ${resolvedPath}\nType: ${describeLocalPath(resolvedPath)}${dangerous ? '\nWarning: this target looks executable or script-like.' : ''}`
+  })
+
+  if (response === 0) {
+    shell.showItemInFolder(resolvedPath)
+    return
+  }
+
+  if (!BLOCK_LOCAL_NON_MARKDOWN_LINKS && response === 1) {
+    shell.openPath(resolvedPath)
   }
 }
 
@@ -445,7 +519,10 @@ ipcMain.on('mt::format-link-click', (e, { data, dirname }) => {
       const win = BrowserWindow.fromWebContents(e.sender)
       openFileOrFolder(win, pathname)
     } else {
-      shell.openPath(pathname)
+      const win = BrowserWindow.fromWebContents(e.sender)
+      promptBeforeOpeningLocalPath(win, pathname).catch(err => {
+        log.error('Unable to open local path from document:', err)
+      })
     }
   }
 })

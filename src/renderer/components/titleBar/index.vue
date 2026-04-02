@@ -98,8 +98,7 @@
 </template>
 
 <script>
-import { ipcRenderer } from 'electron'
-import { getCurrentWindow, Menu as RemoteMenu } from '@electron/remote'
+import { ipcRenderer } from '@/shims/electron'
 import { mapState } from 'vuex'
 import { minimizePath, restorePath, maximizePath, closePath } from '../../assets/window-controls.js'
 import { PATH_SEPARATOR } from '../../config'
@@ -131,8 +130,8 @@ export default {
     this.windowIconMaximize = maximizePath
     this.windowIconClose = closePath
     return {
-      isFullScreen: getCurrentWindow().isFullScreen(),
-      isMaximized: getCurrentWindow().isMaximized(),
+      isFullScreen: false,
+      isMaximized: false,
       show: 'word'
     }
   },
@@ -141,6 +140,10 @@ export default {
     ipcRenderer.on('mt::window-unmaximize', this.onUnmaximize)
     ipcRenderer.on('mt::window-enter-full-screen', this.onEnterFullScreen)
     ipcRenderer.on('mt::window-leave-full-screen', this.onLeaveFullScreen)
+    window.mt.window.getState().then(({ isFullScreen, isMaximized }) => {
+      this.isFullScreen = isFullScreen
+      this.isMaximized = isMaximized
+    })
   },
   props: {
     project: Object,
@@ -190,18 +193,13 @@ export default {
     },
 
     handleCloseClick () {
-      getCurrentWindow().close()
+      window.mt.window.perform('close')
     },
 
-    handleMaximizeClick () {
-      const win = getCurrentWindow()
-      if (win.isFullScreen()) {
-        win.setFullScreen(false)
-      } else if (win.isMaximized()) {
-        win.unmaximize()
-      } else {
-        win.maximize()
-      }
+    async handleMaximizeClick () {
+      const state = await window.mt.window.perform('toggle-maximize')
+      this.isFullScreen = state.isFullScreen
+      this.isMaximized = state.isMaximized
     },
 
     toggleMaxmizeOnMacOS () {
@@ -211,12 +209,11 @@ export default {
     },
 
     handleMinimizeClick () {
-      getCurrentWindow().minimize()
+      window.mt.window.perform('minimize')
     },
 
     handleMenuClick () {
-      const win = getCurrentWindow()
-      RemoteMenu.getApplicationMenu().popup({ window: win, x: 23, y: 20 })
+      window.mt.menu.popupApplication(23, 20)
     },
 
     rename () {
@@ -239,10 +236,10 @@ export default {
     }
   },
   beforeDestroy () {
-    ipcRenderer.off('window-maximize', this.onMaximize)
-    ipcRenderer.off('window-unmaximize', this.onUnmaximize)
-    ipcRenderer.off('window-enter-full-screen', this.onEnterFullScreen)
-    ipcRenderer.off('window-leave-full-screen', this.onLeaveFullScreen)
+    ipcRenderer.off('mt::window-maximize', this.onMaximize)
+    ipcRenderer.off('mt::window-unmaximize', this.onUnmaximize)
+    ipcRenderer.off('mt::window-enter-full-screen', this.onEnterFullScreen)
+    ipcRenderer.off('mt::window-leave-full-screen', this.onLeaveFullScreen)
   }
 }
 </script>

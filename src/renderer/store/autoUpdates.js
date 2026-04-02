@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import notice from '../services/notification'
 
 const state = {}
@@ -10,6 +10,14 @@ const mutations = {}
 // mt::UPDATE_DOWNLOADED
 const actions = {
   LISTEN_FOR_UPDATE ({ commit }) {
+    ipcRenderer.on('mt::UPDATE_DISABLED', (e, message) => {
+      notice.notify({
+        title: 'Updates Disabled',
+        type: 'warning',
+        time: 10000,
+        message
+      })
+    })
     ipcRenderer.on('mt::UPDATE_ERROR', (e, message) => {
       notice.notify({
         title: 'Update',
@@ -29,8 +37,13 @@ const actions = {
       notice.notify({
         title: 'Update Downloaded',
         type: 'info',
-        message
+        message,
+        showConfirm: true
       })
+        .then(() => {
+          ipcRenderer.send('mt::INSTALL_UPDATE')
+        })
+        .catch(() => {})
     })
     ipcRenderer.on('mt::UPDATE_AVAILABLE', (e, message) => {
       notice.notify({

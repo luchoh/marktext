@@ -8,7 +8,7 @@ import exportStyle from '../assets/styles/exportStyle.css'
 import highlightCss from 'prismjs/themes/prism.css'
 import katexCss from 'katex/dist/katex.css'
 import footerHeaderCss from '../assets/styles/headerFooterStyle.css'
-import { EXPORT_DOMPURIFY_CONFIG } from '../config'
+import { DIAGRAM_DOMPURIFY_CONFIG, EXPORT_DOMPURIFY_CONFIG } from '../config'
 import { sanitize, unescapeHTML } from '../utils'
 import { validEmoji } from '../ui/emojis'
 
@@ -49,6 +49,9 @@ class ExportHtml {
       theme: 'default'
     })
     mermaid.init(undefined, this.exportContainer.querySelectorAll('div.mermaid'))
+    this.exportContainer.querySelectorAll('div.mermaid').forEach(node => {
+      node.innerHTML = sanitize(node.innerHTML, DIAGRAM_DOMPURIFY_CONFIG, false)
+    })
     if (this.muya) {
       mermaid.initialize({
         securityLevel: 'strict',
@@ -109,6 +112,7 @@ class ExportHtml {
         if (functionType === 'vega-lite') {
           await render(diagramContainer, JSON.parse(rawCode), options)
         }
+        diagramContainer.innerHTML = sanitize(diagramContainer.innerHTML, DIAGRAM_DOMPURIFY_CONFIG, false)
       } catch (err) {
         diagramContainer.innerHTML = '< Invalid Diagram >'
       }

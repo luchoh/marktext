@@ -1,37 +1,36 @@
-import { getCurrentWindow, Menu as RemoteMenu, MenuItem as RemoteMenuItem } from '@electron/remote'
-import {
-  SEPARATOR,
-  NEW_FILE,
-  NEW_DIRECTORY,
-  COPY,
-  CUT,
-  PASTE,
-  RENAME,
-  DELETE,
-  SHOW_IN_FOLDER
-} from './menuItems'
+import * as contextMenu from './actions'
 
-export const showContextMenu = (event, hasPathCache) => {
-  const menu = new RemoteMenu()
-  const win = getCurrentWindow()
-  const CONTEXT_ITEMS = [
-    NEW_FILE,
-    NEW_DIRECTORY,
-    SEPARATOR,
-    COPY,
-    CUT,
-    PASTE,
-    SEPARATOR,
-    RENAME,
-    DELETE,
-    SEPARATOR,
-    SHOW_IN_FOLDER
-  ]
-
-  PASTE.enabled = hasPathCache
-
-  CONTEXT_ITEMS.forEach(item => {
-    menu.append(new RemoteMenuItem(item))
+export const showContextMenu = async (event, hasPathCache) => {
+  const action = await window.mt.menu.popupSidebarContext({
+    hasPathCache,
+    x: event.clientX,
+    y: event.clientY
   })
-  menu.popup([{ window: win, x: event.clientX, y: event.clientY }])
+
+  switch (action) {
+    case 'newFileMenuItem':
+      contextMenu.newFile()
+      break
+    case 'newDirectoryMenuItem':
+      contextMenu.newDirectory()
+      break
+    case 'copyMenuItem':
+      contextMenu.copy()
+      break
+    case 'cutMenuItem':
+      contextMenu.cut()
+      break
+    case 'pasteMenuItem':
+      contextMenu.paste()
+      break
+    case 'renameMenuItem':
+      contextMenu.rename()
+      break
+    case 'deleteMenuItem':
+      contextMenu.remove()
+      break
+    case 'showInFolderMenuItem':
+      contextMenu.showInFolder()
+      break
+  }
 }

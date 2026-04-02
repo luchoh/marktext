@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { shell } from 'electron'
+import { shell } from '@/shims/electron'
 import bus from '../../bus'
 
 export default {

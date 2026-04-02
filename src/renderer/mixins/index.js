@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import { isSamePathSync } from 'common/filesystem/paths'
 import bus from '../bus'
 

@@ -30,7 +30,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { shell } from 'electron'
+import { shell } from '@/shims/electron'
 import Bool from '@/prefComponents/common/bool'
 import Compound from '@/prefComponents/common/compound'
 import TextBox from '@/prefComponents/common/textBox'

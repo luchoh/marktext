@@ -31,10 +31,10 @@
     "rebuild": "electron-rebuild -f",
     "gen-third-party": "node tools/generateThirdPartyLicense.js",
     "validate-licenses": "node tools/validateLicenses.js",
-    "deobfuscateStackTrace": "node tools/deobfuscateStackTrace.js"
+    "deobfuscateStackTrace": "node tools/deobfuscateStackTrace.js",
+    "security:check": "node tools/checkSecurity.js"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.8",
     "@hfelix/electron-localshortcut": "^4.0.1",
     "@marktext/file-icons": "^1.0.6",
     "@octokit/rest": "^18.12.0",
@@ -46,7 +46,7 @@
     "command-exists": "^1.2.9",
     "dayjs": "^1.11.0",
     "dom-autoscroller": "^2.3.4",
-    "dompurify": "^2.3.6",
+    "dompurify": "^3.0.5",
     "dragula": "^3.7.3",
     "electron-log": "^4.4.6",
     "electron-store": "^8.0.1",
@@ -74,7 +74,6 @@
     "prismjs": "^1.27.0",
     "snabbdom": "^3.4.0",
     "snabbdom-to-html": "^7.0.0",
-    "source-map-support": "^0.5.21",
     "turndown": "^7.1.1",
     "underscore": "^1.13.2",
     "unsplash-js": "^7.0.15",
@@ -83,7 +82,6 @@
     "vega-lite": "^5.2.0",
     "vscode-ripgrep": "^1.12.1",
     "vue": "^2.6.14",
-    "vue-electron": "^1.0.6",
     "vue-router": "^3.5.3",
     "vuex": "^3.6.2",
     "webfontloader": "^1.6.28"

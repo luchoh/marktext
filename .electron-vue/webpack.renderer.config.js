@@ -14,16 +14,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const ESLintPlugin = require('eslint-webpack-plugin')
 
 const { getRendererEnvironmentDefinitions } = require('./marktextEnvironment')
-const { dependencies } = require('../package.json')
-
 const isProduction = process.env.NODE_ENV === 'production'
-/**
- * List of node_modules to include in webpack bundle
- * Required for specific packages like Vue UI libraries
- * that provide pure *.vue files that need compiling
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
- */
-const whiteListedModules = ['vue']
 
 /** @type {import('webpack').Configuration} */
 const rendererConfig = {
@@ -38,9 +29,6 @@ const rendererConfig = {
   entry: {
     renderer: path.join(__dirname, '../src/renderer/main.js')
   },
-  externals: [
-    ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
-  ],
   module: {
     rules: [
       {
@@ -188,27 +176,28 @@ const rendererConfig = {
         : false
     }),
     new webpack.DefinePlugin(getRendererEnvironmentDefinitions()),
-    // Use node http request instead axios's XHR adapter.
-    new webpack.NormalModuleReplacementPlugin(
-      /.+[\/\\]node_modules[\/\\]axios[\/\\]lib[\/\\]adapters[\/\\]xhr\.js$/,
-      'http.js'
-    ),
     new VueLoaderPlugin()
   ],
   cache: false,
   output: {
     filename: '[name].js',
-    libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/electron'),
     assetModuleFilename: 'assets/[name].[contenthash:8][ext]',
     asyncChunks: true
   },
   resolve: {
     alias: {
+      'common/filesystem': path.join(__dirname, '../src/renderer/shims/common-filesystem.js'),
+      'common/filesystem/paths': path.join(__dirname, '../src/renderer/shims/common-filesystem-paths.js'),
+      'command-exists': path.join(__dirname, '../src/renderer/shims/command-exists.js'),
+      'electron$': path.join(__dirname, '../src/renderer/shims/electron.js'),
+      'electron-log$': path.join(__dirname, '../src/renderer/shims/log.js'),
+      'fontmanager-redux$': path.join(__dirname, '../src/renderer/shims/fontmanager-redux.js'),
       'main': path.join(__dirname, '../src/main'),
       '@': path.join(__dirname, '../src/renderer'),
       'common': path.join(__dirname, '../src/common'),
       'muya': path.join(__dirname, '../src/muya'),
+      'path$': 'path-browserify',
       snapsvg: path.join(__dirname, '../src/muya/lib/assets/libs/snap.svg-min.js'),
       'vue$': 'vue/dist/vue.esm.js'
     },

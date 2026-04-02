@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import log from 'electron-log'
 import { mapState } from 'vuex'
 import Compound from '../common/compound'

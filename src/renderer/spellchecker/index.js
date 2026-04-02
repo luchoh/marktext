@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import { isOsx } from '@/util'
 
 /**

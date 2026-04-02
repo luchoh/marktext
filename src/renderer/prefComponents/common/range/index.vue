@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { shell } from 'electron'
+import { shell } from '@/shims/electron'
 
 export default {
   data () {

@@ -1,30 +1,34 @@
-import { getCurrentWindow, Menu as RemoteMenu, MenuItem as RemoteMenuItem } from '@electron/remote'
-import {
-  CLOSE_THIS,
-  CLOSE_OTHERS,
-  CLOSE_SAVED,
-  CLOSE_ALL,
-  SEPARATOR,
-  RENAME,
-  COPY_PATH,
-  SHOW_IN_FOLDER
-} from './menuItems'
+import * as contextMenu from './actions'
 
-export const showContextMenu = (event, tab) => {
-  const menu = new RemoteMenu()
-  const win = getCurrentWindow()
+export const showContextMenu = async (event, tab) => {
   const { pathname } = tab
-  const CONTEXT_ITEMS = [CLOSE_THIS, CLOSE_OTHERS, CLOSE_SAVED, CLOSE_ALL, SEPARATOR, RENAME, COPY_PATH, SHOW_IN_FOLDER]
-  const FILE_CONTEXT_ITEMS = [RENAME, COPY_PATH, SHOW_IN_FOLDER]
-
-  FILE_CONTEXT_ITEMS.forEach(item => {
-    item.enabled = !!pathname
+  const action = await window.mt.menu.popupTabsContext({
+    pathname,
+    x: event.clientX,
+    y: event.clientY
   })
 
-  CONTEXT_ITEMS.forEach(item => {
-    const menuItem = new RemoteMenuItem(item)
-    menuItem._tabId = tab.id
-    menu.append(menuItem)
-  })
-  menu.popup([{ window: win, x: event.clientX, y: event.clientY }])
+  switch (action) {
+    case 'closeThisTab':
+      contextMenu.closeThis(tab.id)
+      break
+    case 'closeOtherTabs':
+      contextMenu.closeOthers(tab.id)
+      break
+    case 'closeSavedTabs':
+      contextMenu.closeSaved()
+      break
+    case 'closeAllTabs':
+      contextMenu.closeAll()
+      break
+    case 'renameFile':
+      contextMenu.rename(tab.id)
+      break
+    case 'copyPath':
+      contextMenu.copyPath(tab.id)
+      break
+    case 'showInFolder':
+      contextMenu.showInFolder(tab.id)
+      break
+  }
 }

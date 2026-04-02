@@ -1,6 +1,4 @@
 import Vue from 'vue'
-import VueElectron from 'vue-electron'
-import sourceMapSupport from 'source-map-support'
 import bootstrapRenderer from './bootstrap'
 import VueRouter from 'vue-router'
 import lang from 'element-ui/lib/locale/lang/en'
@@ -42,15 +40,8 @@ import './assets/styles/index.css'
 import './assets/styles/printService.css'
 
 // -----------------------------------------------
-
-// Decode source map in production - must be registered first
-sourceMapSupport.install({
-  environment: 'node',
-  handleUncaughtExceptions: false,
-  hookRequire: false
-})
-
-global.marktext = {}
+globalThis.global = globalThis
+globalThis.marktext = {}
 bootstrapRenderer()
 
 addElementStyle()
@@ -87,8 +78,6 @@ Vue.use(TabPane)
 Vue.use(Input)
 
 Vue.use(VueRouter)
-
-Vue.use(VueElectron)
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
@@ -97,7 +86,7 @@ services.forEach(s => {
 })
 
 const router = new VueRouter({
-  routes: routes(global.marktext.env.type)
+  routes: routes(globalThis.marktext.env.type)
 })
 
 /* eslint-disable no-new */

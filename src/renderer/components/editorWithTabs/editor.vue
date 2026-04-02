@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import { shell } from 'electron'
+import { shell } from '@/shims/electron'
 import path from 'path'
 import log from 'electron-log'
 import { mapState } from 'vuex'

@@ -90,7 +90,6 @@ import { mapState } from 'vuex'
 import bus from '../../bus'
 import log from 'electron-log'
 import SearchResultItem from './searchResultItem.vue'
-import RipgrepDirectorySearcher from '../../node/ripgrepSearcher'
 import EmptyIcon from '@/assets/icons/undraw_empty.svg'
 import FindCaseIcon from '@/assets/icons/searchIcons/iconCase.svg'
 import FindWordIcon from '@/assets/icons/searchIcons/iconWord.svg'
@@ -103,7 +102,6 @@ export default {
     this.lastSearchTime = new Date()
     this.keyUpTimer = null
     this.searcherCancelCallback = null
-    this.ripgrepDirectorySearcher = new RipgrepDirectorySearcher()
     this.EmptyIcon = EmptyIcon
     this.FindCaseIcon = FindCaseIcon
     this.FindWordIcon = FindWordIcon
@@ -181,8 +179,7 @@ export default {
         searcherCancelCallback,
         isCaseSensitive,
         isWholeWord,
-        isRegexp,
-        ripgrepDirectorySearcher
+        isRegexp
       } = this
 
       if (searcherRunning && searcherCancelCallback) {
@@ -202,36 +199,7 @@ export default {
       this.searcherRunning = true
       this.startShowSearchCancelAreaTimer()
 
-      const newSearchResult = []
-      const promises = ripgrepDirectorySearcher.search([rootDirectoryPath], keyword, {
-        didMatch: searchResult => {
-          if (canceled) return
-
-          // filePath: "<file>"
-          // matches: Array(1)
-          // 0:
-          //   leadingContextLines: []
-          //   lineText: "foo-test"
-          //   matchText: "foo"
-          //   range: Array(2)
-          //     0: (2) [0, 0]
-          //     1: (2) [0, 3]
-          //   length: 2
-          //   trailingContextLines: []
-
-          newSearchResult.push(searchResult)
-        },
-        didSearchPaths: numPathsFound => {
-          // More than 100 files with (multiple) matches were found.
-          if (!canceled && numPathsFound > 100) {
-            canceled = true
-            if (promises.cancel) {
-              promises.cancel()
-            }
-            this.searchErrorString = 'Search was limited to 100 files.'
-          }
-        },
-
+      window.mt.search.searchText(rootDirectoryPath, keyword, {
         // UI options
         isCaseSensitive,
         isWholeWord,
@@ -247,17 +215,18 @@ export default {
         // Only search markdown files
         inclusions: MARKDOWN_INCLUSIONS
       })
-        .then(() => {
-          this.searchResult = newSearchResult
+        .then(({ results, truncated }) => {
+          if (canceled) return
+          if (truncated) {
+            this.searchErrorString = 'Search was limited to 100 files.'
+          }
+          this.searchResult = results
           this.searcherRunning = false
           this.searcherCancelCallback = null
           this.stopShowSearchCancelAreaTimer()
         })
         .catch(err => {
           canceled = true
-          if (promises.cancel) {
-            promises.cancel()
-          }
           this.searcherRunning = false
           this.searcherCancelCallback = null
           this.stopShowSearchCancelAreaTimer()
@@ -269,9 +238,7 @@ export default {
       this.searcherCancelCallback = () => {
         this.stopShowSearchCancelAreaTimer()
         canceled = true
-        if (promises.cancel) {
-          promises.cancel()
-        }
+        this.searcherRunning = false
       }
     },
     /**

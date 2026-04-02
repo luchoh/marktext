@@ -52,7 +52,7 @@ import { loadingPageMixins } from '@/mixins'
 import { mapState } from 'vuex'
 import bus from '@/bus'
 import { DEFAULT_STYLE } from '@/config'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 
 export default {
   name: 'marktext',

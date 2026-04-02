@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import { shell } from 'electron'
+import { shell } from '@/shims/electron'
 import services, { isValidService } from './services.js'
 import legalNoticesCheckbox from './legalNoticesCheckbox'
 import { isFileExecutableSync } from '@/util/fileSystem'

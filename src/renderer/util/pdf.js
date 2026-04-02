@@ -1,7 +1,4 @@
-import fs from 'fs'
-import path from 'path'
 import Slugger from 'muya/lib/parser/marked/slugger'
-import { isFile } from 'common/filesystem'
 import { escapeHTML, unescapeHTML } from 'muya/lib/utils'
 import academicTheme from '@/assets/themes/export/academic.theme.css'
 import liberTheme from '@/assets/themes/export/liber.theme.css'
@@ -55,25 +52,18 @@ export const getCssForOptions = options => {
     output += 'pre.front-matter{display:none!important;}'
   }
 
-  if (theme) {
-    if (theme === 'academic') {
-      output += academicTheme
-    } else if (theme === 'liber') {
-      output += liberTheme
-    } else {
-      // Read theme from disk
-      const { userDataPath } = global.marktext.paths
-      const themePath = path.join(userDataPath, 'themes/export', theme)
-      if (isFile(themePath)) {
-        try {
-          const themeCSS = fs.readFileSync(themePath, 'utf8')
+    if (theme) {
+      if (theme === 'academic') {
+        output += academicTheme
+      } else if (theme === 'liber') {
+        output += liberTheme
+      } else {
+        const themeCSS = window.mt.fileSystem.readExportTheme(theme)
+        if (typeof themeCSS === 'string') {
           output += themeCSS
-        } catch (_) {
-          // No-op
         }
       }
     }
-  }
 
   if (headerFooterFontSize) {
     output += `.page-header .hf-container,

@@ -1,9 +1,8 @@
 import path from 'path'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/shims/electron'
 import { isChildOfDirectory, hasMarkdownExtension, MARKDOWN_INCLUSIONS } from '../../common/filesystem/paths'
 import bus from '../bus'
 import { delay } from '@/util'
-import FileSearcher from '@/node/fileSearcher'
 
 const SPECIAL_CHARS = /[\[\]\\^$.\|\?\*\+\(\)\/]{1}/g // eslint-disable-line no-useless-escape
 
@@ -21,8 +20,6 @@ class QuickOpenCommand {
     // Reference to folder and editor and project state.
     this._editorState = rootState.editor
     this._folderState = rootState.project
-
-    this._directorySearcher = new FileSearcher()
     this._cancelFn = null
   }
 
@@ -125,50 +122,15 @@ class QuickOpenCommand {
     }
 
     // Search root directory on disk.
-    return new Promise((resolve, reject) => {
-      let canceled = false
-      const promises = this._directorySearcher.search([rootPath], '', {
-        didMatch: result => {
-          if (canceled) return
-          searchResult.push(result)
-        },
-        didSearchPaths: numPathsFound => {
-          // Cancel when more than 30 files were found. User should specify the search query.
-          if (!canceled && numPathsFound > 30) {
-            canceled = true
-            if (promises.cancel) {
-              promises.cancel()
-            }
-          }
-        },
-
-        // Only search markdown files that contain the query string.
-        inclusions: this._getInclusions(query)
-      })
-        .then(() => {
-          this._cancelFn = null
-          resolve(
-            searchResult
-              .map(pathname => {
-                const item = { id: pathname }
-                Object.assign(item, this._getPath(pathname))
-                return item
-              })
-          )
-        })
-        .catch(error => {
-          this._cancelFn = null
-          reject(error)
-        })
-
-      this._cancelFn = () => {
+    return window.mt.search.searchFiles(rootPath, this._getInclusions(query))
+      .then(result => {
         this._cancelFn = null
-        canceled = true
-        if (promises.cancel) {
-          promises.cancel()
-        }
-      }
-    })
+        return result.map(pathname => {
+          const item = { id: pathname }
+          Object.assign(item, this._getPath(pathname))
+          return item
+        })
+      })
   }
 
   _getInclusions = query => {
@@ -185,7 +147,7 @@ class QuickOpenCommand {
   }
 
   _getPath = pathname => {
-    const rootPath = this._folderState.projectTree.pathname
+    const rootPath = this._folderState.projectTree && this._folderState.projectTree.pathname
     if (!isChildOfDirectory(rootPath, pathname)) {
       return { title: pathname, description: pathname }
     }

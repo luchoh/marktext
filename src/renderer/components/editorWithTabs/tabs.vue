@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { shell, clipboard } from 'electron'
+import { shell, clipboard } from '@/shims/electron'
 import { mapState } from 'vuex'
 import autoScroll from 'dom-autoscroller'
 import dragula from 'dragula'

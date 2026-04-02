@@ -5,8 +5,11 @@ import { isOsx } from '../../config'
 
 let runningUpdate = false
 let win = null
+let downloadedUpdateInfo = null
+const selfUpdateEnabled = process.env.MARKTEXT_ENABLE_SELF_UPDATE === '1'
 
 autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = false
 
 autoUpdater.on('error', error => {
   if (win) {
@@ -28,22 +31,34 @@ autoUpdater.on('update-not-available', () => {
   runningUpdate = false
 })
 
-autoUpdater.on('update-downloaded', () => {
-  // TODO: We should ask the user, so that the user can save all documents and
-  // not just force close the application.
-
+autoUpdater.on('update-downloaded', info => {
+  downloadedUpdateInfo = info
   if (win) {
-    win.webContents.send('mt::UPDATE_DOWNLOADED', 'Update downloaded, application will be quit for update...')
+    const version = info && info.version ? info.version : 'the downloaded update'
+    win.webContents.send('mt::UPDATE_DOWNLOADED', `Update ${version} downloaded. Review your unsaved work before installing.`)
   }
-  setImmediate(() => autoUpdater.quitAndInstall())
+  runningUpdate = false
 })
 
 ipcMain.on('mt::NEED_UPDATE', (e, { needUpdate }) => {
+  if (!selfUpdateEnabled) {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    win.webContents.send('mt::UPDATE_DISABLED', 'Self-update is disabled for this build. Set MARKTEXT_ENABLE_SELF_UPDATE=1 to enable it.')
+    runningUpdate = false
+    return
+  }
   if (needUpdate) {
     autoUpdater.downloadUpdate()
   } else {
     runningUpdate = false
   }
+})
+
+ipcMain.on('mt::INSTALL_UPDATE', () => {
+  if (!selfUpdateEnabled || !downloadedUpdateInfo) {
+    return
+  }
+  autoUpdater.quitAndInstall(false, true)
 })
 
 ipcMain.on('mt::check-for-update', e => {
@@ -58,6 +73,10 @@ export const userSetting = () => {
 }
 
 export const checkUpdates = browserWindow => {
+  if (!selfUpdateEnabled) {
+    browserWindow.webContents.send('mt::UPDATE_DISABLED', 'Self-update is disabled for this build. Set MARKTEXT_ENABLE_SELF_UPDATE=1 to enable it.')
+    return
+  }
   if (!runningUpdate) {
     runningUpdate = true
     win = browserWindow

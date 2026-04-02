@@ -1,4 +1,4 @@
-import { clipboard, ipcRenderer, shell, webFrame } from 'electron'
+import { clipboard, ipcRenderer, shell, webFrame } from '@/shims/electron'
 import path from 'path'
 import equal from 'fast-deep-equal'
 import { isSamePathSync } from 'common/filesystem/paths'
@@ -349,16 +349,7 @@ const actions = {
   ASK_FOR_IMAGE_AUTO_PATH ({ commit, state }, src) {
     const { pathname } = state.currentFile
     if (pathname) {
-      let rs
-      const promise = new Promise((resolve, reject) => {
-        rs = resolve
-      })
-      const id = getUniqueId()
-      ipcRenderer.once(`mt::response-of-image-path-${id}`, (e, files) => {
-        rs(files)
-      })
-      ipcRenderer.send('mt::ask-for-image-auto-path', { pathname, src, id })
-      return promise
+      return ipcRenderer.invoke('mt::ask-for-image-auto-path', { pathname, src })
     } else {
       return []
     }
@@ -1190,7 +1181,7 @@ const actions = {
   },
 
   ASK_FOR_IMAGE_PATH ({ commit }) {
-    return ipcRenderer.sendSync('mt::ask-for-image-path')
+    return ipcRenderer.invoke('mt::ask-for-image-path')
   },
 
   LISTEN_WINDOW_ZOOM ({ dispatch, rootState }) {

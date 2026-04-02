@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { shell } from 'electron'
+import { shell } from '@/shims/electron'
 
 // Example of fontmanager-redux objects:
 // {

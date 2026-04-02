@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { ipcRenderer, shell } from 'electron'
+import { ipcRenderer, shell } from '@/shims/electron'
 import log from 'electron-log'
 import { setKeyboardLayout } from '@hfelix/electron-localshortcut'
 import Compound from '../common/compound'
