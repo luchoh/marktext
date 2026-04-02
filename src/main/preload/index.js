@@ -19,6 +19,7 @@ import {
   rename,
   uploadImage
 } from './filesystem'
+import { createPlantUmlSvgUrl } from './diagram'
 import { searchFiles, searchText } from './search'
 
 const RECEIVE_CHANNELS = [
@@ -192,6 +193,9 @@ contextBridge.exposeInMainWorld('mt', {
     read: format => clipboard.read(format),
     readText: () => clipboard.readText(),
     writeText: text => clipboard.writeText(text)
+  },
+  diagram: {
+    createPlantUmlSvgUrl
   },
   env,
   fileSystem: {

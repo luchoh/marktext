@@ -25,6 +25,9 @@ window.mt = {
     readText: () => '',
     writeText: () => {}
   },
+  diagram: {
+    createPlantUmlSvgUrl: () => 'https://www.plantuml.com/plantuml/svg/~1TEST'
+  },
   webFrame: {
     setZoomLevel: () => {},
     setZoomFactor: () => {},
