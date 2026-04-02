@@ -7,6 +7,21 @@ import { beginRules } from '../rules'
 import renderInlines from './renderInlines'
 import renderBlock from './renderBlock'
 
+const getInvalidDiagramLabel = functionType => {
+  switch (functionType) {
+    case 'flowchart':
+      return 'Flow Chart'
+    case 'plantuml':
+      return 'PlantUML'
+    case 'vega-lite':
+      return 'Vega-Lite'
+    case 'sequence':
+      return 'Sequence'
+    default:
+      return 'Diagram'
+  }
+}
+
 class StateRender {
   constructor (muya) {
     this.muya = muya
@@ -169,7 +184,7 @@ class StateRender {
           }
           sanitizeRenderedDiagramElement(target)
         } catch (err) {
-          target.innerHTML = `< Invalid ${functionType === 'flowchart' ? 'Flow Chart' : 'Sequence'} Codes >`
+          target.innerHTML = `< Invalid ${getInvalidDiagramLabel(functionType)} Codes >`
           target.classList.add(CLASS_OR_ID.AG_MATH_ERROR)
         }
       }
