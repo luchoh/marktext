@@ -1,0 +1,14 @@
+extends: "./electron-builder.yml"
+
+mac:
+  identity: null
+  artifactName: "marktext-${arch}-mac.${ext}"
+  icon: "resources/icons/icon.icns"
+  darkModeSupport: true
+  target:
+  - target: dmg
+    arch:
+    - arm64
+  - target: zip
+    arch:
+    - arm64

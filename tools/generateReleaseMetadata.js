@@ -40,20 +40,17 @@ const getRelativePath = filepath => toPosixPath(path.relative(outputDir, filepat
 const listFiles = dir => {
   if (!fs.existsSync(dir)) return []
 
-  const queue = [dir]
-  const files = []
-  while (queue.length) {
-    const current = queue.pop()
-    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
-      const fullPath = path.join(current, entry.name)
-      if (entry.isDirectory()) {
-        queue.push(fullPath)
-      } else if (!generatedFiles.has(entry.name)) {
-        files.push(fullPath)
-      }
-    }
-  }
-  return files.sort((a, b) => a.localeCompare(b))
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .map(entry => ({
+      name: entry.name,
+      fullPath: path.join(dir, entry.name)
+    }))
+    .filter(({ name, fullPath }) => {
+      if (generatedFiles.has(name)) return false
+      return fs.statSync(fullPath).isFile()
+    })
+    .map(({ fullPath }) => fullPath)
+    .sort((a, b) => a.localeCompare(b))
 }
 
 const hashFile = filepath => {

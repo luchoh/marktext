@@ -71,17 +71,17 @@ Copy the build app to applications folder, or if on Windows run the executable i
 
 For a local macOS-only release build that never publishes to GitHub:
 
-1. Install dependencies: `yarn install --frozen-lockfile`
+1. Bootstrap dependencies in controlled mode: `yarn run bootstrap:mac:local`
 2. Run validation: `yarn run lint && yarn run security:check && yarn run validate-licenses && yarn run test`
 3. Build local release artifacts: `yarn run release:mac:local`
 4. Optionally generate checksums and SBOM metadata: `yarn run release:mac:local:metadata`
+
+`bootstrap:mac:local` intentionally uses `yarn install --ignore-scripts --frozen-lockfile`, patches `fontmanager-redux` for current macOS toolchains, installs the pinned Electron runtime, and rebuilds native modules with the repo-pinned Node/Python toolchain. Use this path on macOS instead of a plain `yarn install`.
 
 Expected packaged outputs are written to `build/`, including:
 
 - `build/marktext-arm64.dmg`
 - `build/marktext-arm64-mac.zip`
-- `build/marktext-x64.dmg`
-- `build/marktext-x64-mac.zip`
 
 The metadata step also writes:
 
@@ -101,10 +101,11 @@ $ yarn run <script> # or npm run <script>
 | --------------- | ------------------------------------------------ |
 | `build`         | Build MarkText binaries and packages for your OS |
 | `build:bin`     | Build MarkText binary for your OS                |
+| `bootstrap:mac:local` | Install dependencies in controlled mode and rebuild native macOS modules |
 | `dev`           | Build and run MarkText in developer mode         |
 | `lint`          | Lint code style                                  |
-| `release:mac:local` | Build local macOS `.dmg`/`.zip` without publishing |
-| `release:mac:local:metadata` | Build local macOS release artifacts plus checksums/SBOM metadata |
+| `release:mac:local` | Build local arm64 macOS `.dmg`/`.zip` without publishing |
+| `release:mac:local:metadata` | Build local arm64 macOS release artifacts plus checksums/SBOM metadata |
 | `test` / `unit` | Run unit tests                                   |
 
 For more scripts please see `package.json`.

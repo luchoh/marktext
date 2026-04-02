@@ -16,16 +16,17 @@ This repository treats a local macOS build as the primary trusted release path. 
 Run these commands from the repository root:
 
 ```bash
-yarn install --frozen-lockfile
+yarn run bootstrap:mac:local
 yarn run lint
 yarn run security:check
 yarn run validate-licenses
 yarn run test
-yarn run release:mac:local
-yarn run release:metadata build
+yarn run release:mac:local:metadata
 ```
 
-The local release build never publishes to GitHub because `release:mac:local` forces `--publish never` and clears `GH_TOKEN` / `GITHUB_TOKEN`.
+`bootstrap:mac:local` intentionally installs dependencies with scripts disabled first, patches `fontmanager-redux` for modern macOS toolchains, installs Electron explicitly, and only then rebuilds native modules. This avoids the current `fontmanager-redux` failure path on clean macOS hosts.
+
+The local release build never publishes to GitHub because `release:mac:local` forces `--publish never`, clears `GH_TOKEN` / `GITHUB_TOKEN`, and uses a local-only electron-builder config that disables macOS code signing.
 
 ### Local output files
 
@@ -33,8 +34,6 @@ Packaged macOS release artifacts are written to `build/`:
 
 - `build/marktext-arm64.dmg`
 - `build/marktext-arm64-mac.zip`
-- `build/marktext-x64.dmg`
-- `build/marktext-x64-mac.zip`
 
 Release-review metadata is also written to `build/`:
 
