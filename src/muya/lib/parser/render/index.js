@@ -1,6 +1,7 @@
 import loadRenderer from '../../renderers'
-import { CLASS_OR_ID, DIAGRAM_DOMPURIFY_CONFIG, PREVIEW_DOMPURIFY_CONFIG } from '../../config'
+import { CLASS_OR_ID, PREVIEW_DOMPURIFY_CONFIG } from '../../config'
 import { conflict, mixins, camelToSnake, sanitize } from '../../utils'
+import { sanitizeRenderedDiagramElement } from '../../utils/renderSecurity'
 import { patch, toVNode, toHTML, h } from './snabbdom'
 import { beginRules } from '../rules'
 import renderInlines from './renderInlines'
@@ -112,7 +113,7 @@ class StateRender {
           mermaid.parse(code)
           target.innerHTML = sanitize(code, PREVIEW_DOMPURIFY_CONFIG, true)
           mermaid.init(undefined, target)
-          target.innerHTML = sanitize(target.innerHTML, DIAGRAM_DOMPURIFY_CONFIG, false)
+          sanitizeRenderedDiagramElement(target)
         } catch (err) {
           target.innerHTML = '< Invalid Mermaid Codes >'
           target.classList.add(CLASS_OR_ID.AG_MATH_ERROR)
@@ -163,7 +164,7 @@ class StateRender {
           } else if (functionType === 'vega-lite') {
             await render(key, JSON.parse(code), options)
           }
-          target.innerHTML = sanitize(target.innerHTML, DIAGRAM_DOMPURIFY_CONFIG, false)
+          sanitizeRenderedDiagramElement(target)
         } catch (err) {
           target.innerHTML = `< Invalid ${functionType === 'flowchart' ? 'Flow Chart' : 'Sequence'} Codes >`
           target.classList.add(CLASS_OR_ID.AG_MATH_ERROR)
