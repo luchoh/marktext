@@ -6,6 +6,7 @@ Welcome to developer documentation of MarkText.
 - [Build instructions](BUILD.md)
 - [Debugging](DEBUGGING.md)
 - [Interface](INTERFACE.md)
+- [Local macOS sysadmin install guide](SYSADMIN_LOCAL_INSTALL.md)
 - [Security hardening PRD](SECURITY_HARDENING_PRD.md)
 - [Security validation checklist](SECURITY_VALIDATION.md)
 - [Steps to release MarkText](RELEASE.md)
