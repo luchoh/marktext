@@ -1,6 +1,8 @@
 'use strict'
 
+const crypto = require('crypto')
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 const { spawnSync } = require('child_process')
 
@@ -21,6 +23,50 @@ const run = (command, args, env) => {
 
   if (result.status !== 0) {
     process.exit(result.status || 1)
+  }
+}
+
+const electronPackage = require(path.join(rootDir, 'node_modules', 'electron', 'package.json'))
+
+const ensureDir = dir => {
+  fs.mkdirSync(dir, { recursive: true })
+}
+
+const getElectronCacheRoot = () => {
+  return process.env.MARKTEXT_ELECTRON_CACHE ||
+    process.env.electron_config_cache ||
+    path.join(os.homedir(), 'Library', 'Caches', 'electron')
+}
+
+const seedElectronCache = cacheRoot => {
+  const electronZip = process.env.MARKTEXT_ELECTRON_ZIP
+  if (!electronZip) return
+
+  if (!fs.existsSync(electronZip)) {
+    fail(`MARKTEXT_ELECTRON_ZIP points to a missing file: ${electronZip}`)
+  }
+
+  const version = electronPackage.version
+  const platform = process.platform
+  const arch = process.arch
+  const filename = `electron-v${version}-${platform}-${arch}.zip`
+
+  const downloadBaseUrl = `https://github.com/electron/electron/releases/download/v${version}`
+  const cacheKey = crypto
+    .createHash('sha256')
+    .update(downloadBaseUrl)
+    .digest('hex')
+
+  const hashedDir = path.join(cacheRoot, cacheKey)
+  ensureDir(hashedDir)
+  ensureDir(cacheRoot)
+
+  const hashedTarget = path.join(hashedDir, filename)
+  const topLevelTarget = path.join(cacheRoot, filename)
+
+  for (const target of [hashedTarget, topLevelTarget]) {
+    if (fs.existsSync(target)) continue
+    fs.copyFileSync(electronZip, target)
   }
 }
 
@@ -59,10 +105,13 @@ if (process.version !== `v${pinnedNodeVersion}`) {
 }
 
 const python = detectPython()
+const electronCacheRoot = getElectronCacheRoot()
+seedElectronCache(electronCacheRoot)
 const env = {
   ...process.env,
   npm_config_python: python,
-  PYTHON: python
+  PYTHON: python,
+  electron_config_cache: electronCacheRoot
 }
 
 run('yarn', ['install', '--ignore-scripts', '--frozen-lockfile'], env)
