@@ -1,5 +1,8 @@
 name: Release
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -13,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-11, ubuntu-latest]
+        os: [macos-11, ubuntu-24.04]
 
     env:
       DISPLAY: ":99.0"
@@ -23,13 +26,12 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
-          node-version: 16
-          check-latest: true
+          node-version-file: .node-version
           cache: yarn
           cache-dependency-path: yarn.lock
 
@@ -38,27 +40,27 @@ jobs:
         #                         electron-builder                 | keyboard-layout         | keytar                      | fontmanager     | RPM on Ubuntu
         run: |
           sudo apt-get -y update
-          sudo apt-get install -y icnsutils graphicsmagick xz-utils libx11-dev libxkbfile-dev gnome-keyring libsecret-1-dev libfontconfig-dev rpm
+          sudo apt-get install -y icnsutils graphicsmagick xz-utils libx11-dev libxkbfile-dev gnome-keyring libsecret-1-dev libfontconfig-dev rpm xvfb
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-node_modules-cache-v2-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          key: ${{ runner.os }}-node_modules-cache-v3-${{ hashFiles('.node-version', 'yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node_modules-cache-v2-
+            ${{ runner.os }}-node_modules-cache-v3-
 
       - name: Cache Electron
-        uses: actions/cache@v5
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ env.HOME }}/.cache/electron
-          key: ${{ runner.os }}-electron-cache-v2-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          key: ${{ runner.os }}-electron-cache-v3-${{ hashFiles('.node-version', 'yarn.lock') }}
 
       - name: Cache Electron-Builder
-        uses: actions/cache@v5
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ env.HOME }}/.cache//electron-builder
-          key: ${{ runner.os }}-electron-builder-cache-v2-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          key: ${{ runner.os }}-electron-builder-cache-v3-${{ hashFiles('.node-version', 'yarn.lock') }}
 
       - name: Install dependencies
         run: yarn install --check-files --frozen-lockfile
@@ -70,12 +72,16 @@ jobs:
       - name: Lint
         run: |
           yarn run lint
+          yarn run security:check
           yarn run validate-licenses
 
       - name: Run unit and E2E tests
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: yarn run test
+        if: runner.os == 'Linux'
+        run: xvfb-run -a yarn run test
+
+      - name: Run unit and E2E tests
+        if: runner.os != 'Linux'
+        run: yarn run test
 
       - name: Build and release
         run: |
@@ -88,26 +94,27 @@ jobs:
                 exit 1
               fi
 
-      - name: Calculate checksums
-        if: runner.os == 'Linux'
-        run: |
-          sha256sum build/marktext-x64.tar.gz
-          sha256sum build/marktext-x86_64.AppImage
-          sha256sum build/marktext-*.deb
-          sha256sum build/marktext-*.rpm
+      - name: Generate release metadata
+        run: yarn run release:metadata build
+
+      - name: Show generated checksums
+        run: cat build/SHA256SUMS.txt
         shell: bash
 
-      - name: Calculate checksums
-        if: runner.os == 'macOS'
-        run: |
-          shasum -a 256 build/marktext-arm64-mac.zip
-          shasum -a 256 build/marktext-x64-mac.zip
-          shasum -a 256 build/marktext-arm64.dmg
-          shasum -a 256 build/marktext-x64.dmg
-        shell: bash
+      - name: Upload release metadata
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: release-metadata-${{ runner.os }}
+          if-no-files-found: error
+          path: |
+            build/SHA256SUMS.txt
+            build/release-metadata.json
+            build/dependency-inventory.json
+            build/sbom.cyclonedx.json
+            build/provenance.json
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     continue-on-error: false
     timeout-minutes: 45
 
@@ -118,43 +125,42 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
-          node-version: 16
-          check-latest: true
+          node-version-file: .node-version
           cache: yarn
           cache-dependency-path: yarn.lock
 
       # Workaround: Fix native build failure due to outdated node-gyp version.
       - name: Fix node-gyp
         run: |
-          npm install --global node-gyp@latest
+          npm install --global node-gyp@11.4.2
           npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
           node-gyp install
         shell: pwsh
 
       - name: Cache node_modules
-        uses: actions/cache@v5
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ github.workspace }}\node_modules
-          key: ${{ runner.os }}-node_modules-cache-v2-${{ hashFiles(format('{0}{1}', github.workspace, '\yarn.lock')) }}
+          key: ${{ runner.os }}-node_modules-cache-v3-${{ hashFiles('.node-version', 'yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node_modules-cache-v2-
+            ${{ runner.os }}-node_modules-cache-v3-
 
       - name: Cache Electron
-        uses: actions/cache@v5
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ env.LOCALAPPDATA }}\electron\Cache
-          key: ${{ runner.os }}-electron-cache-v2-${{ hashFiles(format('{0}{1}', github.workspace, '\yarn.lock')) }}
+          key: ${{ runner.os }}-electron-cache-v3-${{ hashFiles('.node-version', 'yarn.lock') }}
 
       - name: Cache Electron-Builder
-        uses: actions/cache@v5
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ env.LOCALAPPDATA }}\electron-builder\cache
-          key: ${{ runner.os }}-electron-builder-cache-v2-${{ hashFiles(format('{0}{1}', github.workspace, '\yarn.lock')) }}
+          key: ${{ runner.os }}-electron-builder-cache-v3-${{ hashFiles('.node-version', 'yarn.lock') }}
 
       - name: Install dependencies
         run: yarn install --check-files --frozen-lockfile
@@ -162,6 +168,7 @@ jobs:
       - name: Lint
         run: |
           yarn run lint
+          yarn run security:check
           yarn run validate-licenses
 
       - name: Run unit and E2E tests
@@ -170,8 +177,21 @@ jobs:
       - name: Build and release
         run: yarn run release:win --publish always
 
-      - name: Calculate checksums
-        run: |
-          get-filehash -Algorithm SHA256 "build\marktext-setup.exe"
-          get-filehash -Algorithm SHA256 "build\marktext-*-win.zip"
+      - name: Generate release metadata
+        run: yarn run release:metadata build
+
+      - name: Show generated checksums
+        run: Get-Content "build/SHA256SUMS.txt"
         shell: pwsh
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: release-metadata-${{ runner.os }}
+          if-no-files-found: error
+          path: |
+            build/SHA256SUMS.txt
+            build/release-metadata.json
+            build/dependency-inventory.json
+            build/sbom.cyclonedx.json
+            build/provenance.json

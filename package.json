@@ -30,6 +30,7 @@
     "release:muya": "yarn run build:muya && cd src/muya && yarn publish",
     "rebuild": "electron-rebuild -f",
     "gen-third-party": "node tools/generateThirdPartyLicense.js",
+    "release:metadata": "node tools/generateReleaseMetadata.js",
     "validate-licenses": "node tools/validateLicenses.js",
     "deobfuscateStackTrace": "node tools/deobfuscateStackTrace.js",
     "security:check": "node tools/checkSecurity.js"

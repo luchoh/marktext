@@ -10,7 +10,7 @@ git clone https://github.com/marktext/marktext.git
 
 Before you can get started developing, you need set up your build environment:
 
-- Node.js `>=v16` but `<v17` and yarn
+- Node.js `16.19.1` and yarn (the repository pins this exact Node version in `.node-version`, and CI uses the same version)
 - Python `>=v3.6` for node-gyp
 - C++ compiler and development tools
 - Build is supported on Linux, macOS and Windows
@@ -46,6 +46,17 @@ Useful commands from the shell:
 - `app-lint`
 - `app-unit`
 - `app-build`
+
+### Expected network activity
+
+The project still requires some network access when caches are cold:
+
+- `yarn install` fetches package tarballs from the npm registry.
+- `electron` downloads pinned runtime archives into the Electron cache on first install/rebuild.
+- `electron-builder` may download packaging helper binaries into its cache on first package build.
+- `playwright` may download browser binaries during dependency installation if its local browser cache is absent.
+
+CI and release workflows cache these downloads, pin the Node version via `.node-version`, and pin GitHub Actions by commit SHA to reduce drift.
 
 ### Let's build
 
