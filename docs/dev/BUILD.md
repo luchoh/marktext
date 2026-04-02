@@ -31,6 +31,22 @@ On Red Hat-based Linux: `sudo dnf install libX11-devel libxkbfile-devel libsecre
 - Windows 10 SDK (only needed before Windows 10)
 - Visual Studio 2019 (preferred)
 
+### Reproducible `devenv` and `direnv` setup
+
+If you already have `nix`, `direnv`, and `devenv` installed, you can use the repo-local environment instead of managing Node.js and Yarn on the host:
+
+1. Run `direnv allow`
+2. Run `devenv shell`
+3. Review the repository’s security posture before installing dependencies
+4. Run `MARKTEXT_ALLOW_INSTALL=1 app-install` only if that review is acceptable
+5. Run `devenv up app`
+
+Useful commands from the shell:
+
+- `app-lint`
+- `app-unit`
+- `app-build`
+
 ### Let's build
 
 1. Go to `marktext` folder

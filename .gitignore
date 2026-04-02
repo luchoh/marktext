@@ -14,4 +14,17 @@ thumbs.db
 !.gitkeep
 .idea
 .env
+.env.*
+!.env.*.example
 .eslintcache
+
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# Local caches
+.cache/
