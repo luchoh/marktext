@@ -1,43 +1,89 @@
 # Steps to release MarkText
 
-- Create a release candidate
-  - Create branch `release-v%version%`
-  - Set environment variable `MARKTEXT_IS_STABLE` to `1` (default on AppVeyor and Travis CI)
-  - Ensure [changelog](https://github.com/marktext/marktext/blob/master/.github/CHANGELOG.md) is up-to-date
-  - Bump version in `package.json` and changelog
-  - Update all `README.md` files
-  - Bump Flathub version ([marktext.appdata.xml](https://github.com/marktext/marktext/blob/master/resources/linux/marktext.appdata.xml))
-  - Create commit `release version %version%`
-  - Ensure all tests pass
-  - A new draft release should be available or create one
-- Publish GitHub release
-  - Add git tag `v%version%`
-  - Add changelog
-  - Add SHA256 checksums
-  - Review generated `build/SHA256SUMS.txt`
-  - Review generated `build/release-metadata.json`
-  - Review generated `build/dependency-inventory.json`
-  - Review generated `build/sbom.cyclonedx.json`
-  - Review generated `build/provenance.json`
-- Review workflow artifacts
-  - Download the `release-metadata-*` workflow artifacts
-  - Confirm checksums, toolchain versions, commit SHA, SBOM contents, and dependency inventory match the intended release inputs
-  - Confirm `build/provenance.json` subjects and workflow identifiers match the published release artifacts
-  - Verify the GitHub attestation for a downloaded asset with `gh attestation verify PATH/TO/ASSET -R marktext/marktext`
-- Review GitHub plan support
-  - Artifact attestations require a public repository on current GitHub plans, or GitHub Enterprise Cloud for private/internal repositories
-- Review expected network downloads
-  - `yarn install` should only fetch the pinned dependency graph from the registry
-  - Electron runtime downloads should land in the Electron cache
-  - `electron-builder` helper downloads should land in the electron-builder cache
-  - Playwright browser downloads are expected only when the browser cache is cold
-- Update website and documentation
-- Publish [Flathub package](https://github.com/flathub/com.github.marktext.marktext)
-  - Ensure native dependencies
-  - Update `runtime` and `SDK` if needed
-  - Bump version and update URLs
-  - Test the package (`scripts/build-bundle.sh && scripts/test-marktext.sh`)
-  - Create commit `Update to v%version%`
+## Preferred path: local macOS release
+
+This repository treats a local macOS build as the primary trusted release path. GitHub Actions is useful as an external verification lane, but the authoritative build should come from a machine you control.
+
+### Prepare the release candidate
+
+1. Ensure [changelog](https://github.com/marktext/marktext/blob/master/.github/CHANGELOG.md) is up-to-date.
+2. Bump the version in `package.json` and the changelog.
+3. Update `README.md` files as needed.
+4. Create a release commit such as `release version %version%`.
+
+### Build and validate locally on macOS
+
+Run these commands from the repository root:
+
+```bash
+yarn install --frozen-lockfile
+yarn run lint
+yarn run security:check
+yarn run validate-licenses
+yarn run test
+yarn run release:mac:local
+yarn run release:metadata build
+```
+
+The local release build never publishes to GitHub because `release:mac:local` forces `--publish never` and clears `GH_TOKEN` / `GITHUB_TOKEN`.
+
+### Local output files
+
+Packaged macOS release artifacts are written to `build/`:
+
+- `build/marktext-arm64.dmg`
+- `build/marktext-arm64-mac.zip`
+- `build/marktext-x64.dmg`
+- `build/marktext-x64-mac.zip`
+
+Release-review metadata is also written to `build/`:
+
+- `build/SHA256SUMS.txt`
+- `build/release-metadata.json`
+- `build/dependency-inventory.json`
+- `build/sbom.cyclonedx.json`
+- `build/provenance.json`
+
+### Review before publishing
+
+1. Inspect the generated `.dmg` and `.zip` artifacts in `build/`.
+2. Review `build/SHA256SUMS.txt`.
+3. Review `build/release-metadata.json`.
+4. Review `build/dependency-inventory.json`.
+5. Review `build/sbom.cyclonedx.json`.
+6. Review `build/provenance.json`.
+
+### Publish
+
+1. Create or update the GitHub release manually.
+2. Add git tag `v%version%`.
+3. Upload the reviewed `.dmg` and `.zip` files from `build/`.
+4. Add changelog notes and checksums.
+
+## Optional: GitHub Actions as verification
+
+GitHub Actions can still be used to confirm that a clean external environment reproduces the build and test results.
+
+- `Build` runs on pushes and pull requests for `main`, `master`, and `develop`.
+- `Release` runs on pushes to `release-v*` branches.
+- Workflow artifacts and GitHub attestations are secondary verification signals, not the primary trusted release artifact source in this model.
+
+## Expected network downloads
+
+- `yarn install` fetches the pinned dependency graph from the npm registry.
+- `electron` downloads pinned runtime archives into the Electron cache when the cache is cold.
+- `electron-builder` may download helper binaries into its cache on first package build.
+- `playwright` may download browser binaries during dependency installation if its browser cache is absent.
+
+## Flathub follow-up
+
+Publish [Flathub package](https://github.com/flathub/com.github.marktext.marktext) separately:
+
+- Ensure native dependencies
+- Update `runtime` and `SDK` if needed
+- Bump version and update URLs
+- Test the package (`scripts/build-bundle.sh && scripts/test-marktext.sh`)
+- Create commit `Update to v%version%`
 
 ## Work after releasing
 

@@ -9,6 +9,8 @@
     "release": "echo 'Please run \"build\" or \"release:{linux,mac,win}\"' && exit 1",
     "release:linux": "node .electron-vue/build.js && electron-builder build --linux",
     "release:mac": "node .electron-vue/build.js && electron-builder build --mac",
+    "release:mac:local": "cross-env MARKTEXT_IS_STABLE=1 GH_TOKEN= GITHUB_TOKEN= node .electron-vue/build.js && electron-builder build --mac --publish never",
+    "release:mac:local:metadata": "yarn run release:mac:local && yarn run release:metadata build",
     "release:win": "node .electron-vue/build.js && electron-builder build --win",
     "build": "node .electron-vue/build.js && electron-builder",
     "build:bin": "node .electron-vue/build.js && electron-builder --dir",

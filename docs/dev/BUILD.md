@@ -67,6 +67,30 @@ CI and release workflows cache these downloads, pin the Node version via `.node-
 
 Copy the build app to applications folder, or if on Windows run the executable installer.
 
+### Local macOS release
+
+For a local macOS-only release build that never publishes to GitHub:
+
+1. Install dependencies: `yarn install --frozen-lockfile`
+2. Run validation: `yarn run lint && yarn run security:check && yarn run validate-licenses && yarn run test`
+3. Build local release artifacts: `yarn run release:mac:local`
+4. Optionally generate checksums and SBOM metadata: `yarn run release:mac:local:metadata`
+
+Expected packaged outputs are written to `build/`, including:
+
+- `build/marktext-arm64.dmg`
+- `build/marktext-arm64-mac.zip`
+- `build/marktext-x64.dmg`
+- `build/marktext-x64-mac.zip`
+
+The metadata step also writes:
+
+- `build/SHA256SUMS.txt`
+- `build/release-metadata.json`
+- `build/dependency-inventory.json`
+- `build/sbom.cyclonedx.json`
+- `build/provenance.json`
+
 ### Important scripts
 
 ```
@@ -79,6 +103,8 @@ $ yarn run <script> # or npm run <script>
 | `build:bin`     | Build MarkText binary for your OS                |
 | `dev`           | Build and run MarkText in developer mode         |
 | `lint`          | Lint code style                                  |
+| `release:mac:local` | Build local macOS `.dmg`/`.zip` without publishing |
+| `release:mac:local:metadata` | Build local macOS release artifacts plus checksums/SBOM metadata |
 | `test` / `unit` | Run unit tests                                   |
 
 For more scripts please see `package.json`.
