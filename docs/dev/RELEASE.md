@@ -23,6 +23,9 @@
   - Download the `release-metadata-*` workflow artifacts
   - Confirm checksums, toolchain versions, commit SHA, SBOM contents, and dependency inventory match the intended release inputs
   - Confirm `build/provenance.json` subjects and workflow identifiers match the published release artifacts
+  - Verify the GitHub attestation for a downloaded asset with `gh attestation verify PATH/TO/ASSET -R marktext/marktext`
+- Review GitHub plan support
+  - Artifact attestations require a public repository on current GitHub plans, or GitHub Enterprise Cloud for private/internal repositories
 - Review expected network downloads
   - `yarn install` should only fetch the pinned dependency graph from the registry
   - Electron runtime downloads should land in the Electron cache

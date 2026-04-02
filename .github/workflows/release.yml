@@ -1,7 +1,9 @@
 name: Release
 
 permissions:
+  attestations: write
   contents: write
+  id-token: write
 
 on:
   push:
@@ -97,6 +99,17 @@ jobs:
       - name: Generate release metadata
         run: yarn run release:metadata build
 
+      - name: Generate build provenance attestation
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32
+        with:
+          subject-checksums: build/SHA256SUMS.txt
+
+      - name: Generate SBOM attestation
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e
+        with:
+          subject-checksums: build/SHA256SUMS.txt
+          sbom-path: build/sbom.cyclonedx.json
+
       - name: Show generated checksums
         run: cat build/SHA256SUMS.txt
         shell: bash
@@ -179,6 +192,17 @@ jobs:
 
       - name: Generate release metadata
         run: yarn run release:metadata build
+
+      - name: Generate build provenance attestation
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32
+        with:
+          subject-checksums: build/SHA256SUMS.txt
+
+      - name: Generate SBOM attestation
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e
+        with:
+          subject-checksums: build/SHA256SUMS.txt
+          sbom-path: build/sbom.cyclonedx.json
 
       - name: Show generated checksums
         run: Get-Content "build/SHA256SUMS.txt"
