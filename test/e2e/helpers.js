@@ -16,10 +16,18 @@ const getElectronPath = () => {
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+const getElectronFlags = () => {
+  return process.platform === 'linux'
+    ? ['--no-sandbox', '--disable-setuid-sandbox']
+    : []
+}
+
 const launchElectron = async userArgs => {
   userArgs = userArgs || []
   const executablePath = getElectronPath()
-  const args = [mainEntrypoint, '--user-data-dir', getTempPath()].concat(userArgs)
+  const args = getElectronFlags()
+    .concat([mainEntrypoint, '--user-data-dir', getTempPath()])
+    .concat(userArgs)
   const app = await _electron.launch({
     executablePath,
     args,
