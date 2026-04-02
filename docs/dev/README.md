@@ -7,6 +7,7 @@ Welcome to developer documentation of MarkText.
 - [Debugging](DEBUGGING.md)
 - [Interface](INTERFACE.md)
 - [Security hardening PRD](SECURITY_HARDENING_PRD.md)
+- [Security validation checklist](SECURITY_VALIDATION.md)
 - [Steps to release MarkText](RELEASE.md)
 - [Prepare a hotfix](RELEASE_HOTFIX.md)
 - [Internal documentation](code/README.md)
